@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  password       String
+  sale_as_buyer  Sale[]          @relation("buyer")
+  sale_as_seller Sale[]          @relation("seller")
+  WishList       WishList[]
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  Rating         ProductRating[]
+}
+
+
+model Product {
+  id          String          @id @default(uuid())
+  name        String
+  price       Float
+  amount      Int
+  description String
+  size        String
+  Category    Category?       @relation(fields: [category], references: [name])
+  category    String?
+  Subcategory Subcategory?    @relation(fields: [subcategory], references: [name])
+  subcategory String?
+  SaleProduct SaleProduct[]
+  WishList    WishList[]
+  Rating      ProductRating[]
+  Image       Image[]
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
+}
+
+model Category {
+  id         String    @id @default(uuid())
+  name       String    @unique
+  Product    Product[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model Subcategory {
+  id         String    @id @default(uuid())
+  name       String    @unique
+  Product    Product[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model Sale {
+  id          String        @id @default(uuid())
+  total_value Float
+  Buyer       User?         @relation("buyer", fields: [buyerId], references: [id])
+  buyerId     String?
+  Seller      User?         @relation("seller", fields: [sellerId], references: [id])
+  sellerId    String?
+  SaleProduct SaleProduct[]
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+}
+
+model SaleProduct {
+  id         String   @id @default(uuid())
+  quantity   Int
+  Sale       Sale     @relation(fields: [saleId], references: [id])
+  saleId     String
+  Product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model WishList {
+  id         String   @id @default(uuid())
+  Product    Product  @relation(fields: [productid], references: [id])
+  productid  String
+  User       User     @relation(fields: [userId], references: [id])
+  userId     String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model ProductRating {
+  id         String   @id @default(uuid())
+  comment    String
+  stars      Int
+  Product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  User       User     @relation(fields: [userId], references: [id])
+  userId     String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  path      String
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId String?
+}
